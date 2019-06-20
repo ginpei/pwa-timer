@@ -1,0 +1,112 @@
+html {
+  --app-color-bg: #fff;
+  --app-color-fg: #333;
+  --app-color-link: #00f;
+  --app-color-theme-text: #fff;
+  --app-color-theme: #036;
+
+  background-color: var(--app-color-bg);
+  color: var(--app-color-fg);
+  font-size: 16px;
+  height: 100%;
+}
+
+body {
+  font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  height: 100%;
+  margin: 0;
+}
+
+button {
+  min-height: 2rem;
+}
+
+a {
+  color: var(--app-color-link);
+}
+
+.ui-container {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  width: calc(100% - 2rem);
+  max-width: calc(800px - 2rem);
+}
+
+.ui-pin {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.ui-icon {
+  height: 1em;
+  vertical-align: bottom;
+  width: 1em;
+}
+
+#app {
+  height: 100%;
+}
+
+/**
+* App layout
+*/
+
+.appLayout {
+  --appLayout-header-height: 50px;
+
+  display: grid;
+  height: 100%;
+  grid-template:
+    "header" var(--appLayout-header-height)
+    "body" calc(100% - var(--appLayout-header-height))
+    / 100%
+}
+
+.appLayout-header {
+  display: grid;
+  grid-area: header;
+}
+
+.appLayout-body {
+  display: grid;
+  grid-area: body;
+}
+
+/**
+* App header
+*/
+
+.appHeader {
+  background-color: var(--app-color-theme);
+  color: var(--app-color-theme-text);
+  line-height: var(--appLayout-header-height);
+}
+
+.appHeader-inner {
+  display: flex;
+  height: var(--appLayout-header-height);
+  justify-content: space-between;
+}
+
+.appHeader-title {
+  font-size: 1em;
+  margin: 0;
+}
+
+.appHeader-buttons {
+  display: flex;
+}
+
+.appHeader-button {
+  background-color: transparent;
+  border-style: none;
+  color: inherit;
+  line-height: 100%;
+  min-width: 3rem;
+  padding: 0 1.5em;
+}

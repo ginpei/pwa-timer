@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap');
+@import "./gpui/basics.css";
+
+.app-wrapper {
+  box-sizing: border-box;
+  min-height: 100%;
+}
+
+.count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 30vw;
+  text-align: center;
+}
+
+@media (min-width: 800px) {
+  .count {
+    font-size: calc(800px * 0.3);
+  }
+}
+
+.console {
+  display: flex;
+  height: 50px;
+  line-height: 50px;
+  margin-bottom: 1rem;
+}
+
+.console-item {
+  flex-grow: 1;
+}
+
+label.console-item {
+  border: 1px solid #ccc;
+  box-shadow: 0 0 1rem #ccc9 inset;
+  padding: 0 1rem;
+}
