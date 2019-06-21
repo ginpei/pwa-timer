@@ -14,6 +14,7 @@ const preferences = {
   notificationEnabled: false,
 };
 
+/** @type {() => void} */
 let stopTimer = () => undefined;
 let goalTime = 0;
 
@@ -194,7 +195,7 @@ function main (sw) {
       }
 
       case 'timer/stop': {
-        stopTimer(sw);
+        stopTimer();
         tick(sw);
         postMessageToClients(sw, { type: 'timer/stop' });
         break;
@@ -210,5 +211,6 @@ function main (sw) {
   });
 }
 
+// @ts-ignore
 // eslint-disable-next-line no-restricted-globals
 main(self);
