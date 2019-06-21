@@ -1,5 +1,5 @@
 /* eslint-disable no-use-before-define */
-import { findElement } from '../misc.js';
+import { findElement } from './misc.js';
 
 async function installServiceWorker () {
   try {
