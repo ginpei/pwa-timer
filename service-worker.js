@@ -3,7 +3,19 @@
 const pathBase = '/pwa-timer/';
 
 const cachePaths = [
-  'offline.html',
+  'manifest.json',
+  'index.html',
+  'about.html',
+  'assets/gpui/basics.css',
+  'assets/gpui/icon-192.png',
+  'assets/gpui/icon-512.png',
+  'assets/vendor/nhk-creative-library/D0002011518_00000_A_001.m4a',
+  'assets/script.js',
+  'assets/style.css',
+];
+const outerCachePaths = [
+  'https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap',
+  'https://fonts.gstatic.com/s/sharetechmono/v8/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2',
 ];
 
 /** @type {AppPreferences} */
@@ -39,30 +51,60 @@ function onActivate (event, sw) {
   // eslint-disable-next-line no-console
   console.log('[SW] activate');
 
+  // TODO avoid 206 somehow
   const p = getCache()
-    .then((cache) => cache.addAll(cachePaths.map((v) => `${pathBase}${v}`)))
-    .then(() => sw.clients.claim());
+    .then((cache) => cache.addAll(cachePaths.map((v) => `${pathBase}${v}`).concat(outerCachePaths)))
+    .then(() => sw.clients.claim())
+    .catch((error) => console.error(error));
   event.waitUntil(p);
+}
+
+/**
+ * @param {RequestInfo} request
+ */
+async function getCachedResponse (request) {
+  const cache = await getCache();
+  const res = await cache.match(request);
+  if (!res) {
+    throw new Error(`Failed to load cache: "${String(request)}"`);
+  }
+
+  return res;
 }
 
 /**
  * @param {FetchEvent} event
  */
 function onFetch (event) {
-  const { pathname } = new URL(event.request.url);
-  if (!pathname.startsWith(pathBase)) {
+  const sUrl = event.request.url;
+  const url = new URL(sUrl);
+  if (
+    url.protocol === globalThis.location.protocol
+    && url.host === globalThis.location.host
+    && url.pathname.startsWith(pathBase)
+  ) {
+    const pathname = url.pathname === pathBase
+      ? `${pathBase}index.html`
+      : url.pathname;
+    event.respondWith(
+      getCachedResponse(pathname)
+        .catch((error) => {
+          console.error(error);
+          return fetch(pathname);
+        }),
+    );
     return;
   }
 
-  event.respondWith(fetch(event.request).catch(async () => {
-    const cache = await getCache();
-    const res = await cache.match(`${pathBase}offline.html`);
-    if (res) {
-      return res;
-    }
-
-    return new Response('Not found');
-  }));
+  if (outerCachePaths.includes(sUrl)) {
+    event.respondWith(
+      getCachedResponse(sUrl)
+        .catch((error) => {
+          console.error(error);
+          return fetch(sUrl);
+        }),
+    );
+  }
 }
 
 function getCache () {
