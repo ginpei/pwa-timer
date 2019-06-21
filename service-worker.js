@@ -66,7 +66,7 @@ function onFetch (event) {
 }
 
 function getCache () {
-  return caches.open('pwa-pomodoro');
+  return caches.open('pwa-timer');
 }
 
 /**
