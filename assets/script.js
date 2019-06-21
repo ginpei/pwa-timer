@@ -1,5 +1,4 @@
 /* eslint-disable no-use-before-define */
-import { findElement } from './misc.js';
 
 async function installServiceWorker () {
   try {
@@ -95,6 +94,19 @@ function turnNotification (el, enabled) {
       }
     });
   }
+}
+
+/**
+ * @param {Element} container
+ * @param {string} name
+ * @return {any}
+ */
+function findElement (container, name) {
+  const el = container.querySelector(`[data-js="${name}"]`);
+  if (!el) {
+    throw new Error(`Element named ${name} is not found`);
+  }
+  return el;
 }
 
 /** @type {HTMLDivElement} */
