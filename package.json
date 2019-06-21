@@ -4,7 +4,7 @@
     "lint": "eslint .",
     "start": "browser-sync --config ./bs-config.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "type-check": "tsc"
+    "type-check": "tsc || true && tsc -p assets/tsconfig.json"
   },
   "devDependencies": {
     "browser-sync": "^2.26.5",

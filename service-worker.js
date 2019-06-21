@@ -1,7 +1,4 @@
 /* eslint-disable no-use-before-define */
-/// <reference path="./node_modules/typescript/lib/lib.es2015.d.ts" />
-/// <reference path="./node_modules/typescript/lib/lib.webworker.d.ts" />
-/// <reference path="./types/index.d.ts" />
 
 const pathBase = '/pwa-timer/';
 

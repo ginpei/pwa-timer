@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfig.common.json",
+  "include": [
+    "./",
+    "../types/",
+  ],
+  "compilerOptions": {
+    "strict": true,                           /* Enable all strict type-checking options. */
+    "lib": [
+      "dom",
+      "es2015",
+    ],
+  },
+}
