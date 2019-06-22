@@ -39,7 +39,6 @@ a {
   flex-direction: column;
   justify-content: space-around;
   overflow: auto;
-  padding: 1rem;
 }
 
 .ui-icon {
