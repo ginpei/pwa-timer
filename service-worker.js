@@ -12,20 +12,12 @@ const cachePaths = [
   'assets/vendor/nhk-creative-library/D0002011518_00000_A_001.m4a',
   'assets/script.js',
   'assets/style.css',
+  'assets/Timer.js',
 ];
 const outerCachePaths = [
   'https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap',
   'https://fonts.gstatic.com/s/sharetechmono/v8/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2',
 ];
-
-/** @type {AppPreferences} */
-const preferences = {
-  notificationEnabled: false,
-};
-
-/** @type {() => void} */
-let stopTimer = () => undefined;
-let goalTime = 0;
 
 /**
  * @param {ExtendableEvent} event
@@ -121,51 +113,6 @@ function getCache () {
 }
 
 /**
- * @param {number} duration
- * @param {() => void} onTick
- * @param {() => void} onAlarm
- */
-function startTimer (duration, onTick, onAlarm) {
-  stopTimer();
-  goalTime = Date.now() + duration;
-
-  const tm = setInterval(() => {
-    const now = Date.now();
-    if (now < goalTime) {
-      onTick();
-    } else {
-      stopTimer();
-      onAlarm();
-    }
-  }, 16);
-
-  stopTimer = () => {
-    clearInterval(tm);
-    goalTime = 0;
-  };
-}
-
-/**
- * @param {ServiceWorkerGlobalScope} sw
- */
-function ringAlarm (sw) {
-  postMessageToClients(sw, {
-    type: 'timer/alarm',
-  });
-}
-
-/**
- * @param {ServiceWorkerGlobalScope} sw
- */
-function tick (sw) {
-  const remaining = goalTime - Date.now();
-  postMessageToClients(sw, {
-    remaining,
-    type: 'timer/tick',
-  });
-}
-
-/**
  * @param {ServiceWorkerGlobalScope} sw
  * @param {string} body
  */
@@ -177,25 +124,6 @@ function showNotification (sw, body) {
     icon: '/pwa-timer/assets/gpui/icon-512.png',
   };
   sw.registration.showNotification(title, options);
-}
-
-/**
- * @param {ServiceWorkerGlobalScope} sw
- */
-function getClients (sw) {
-  return sw.clients.matchAll();
-}
-
-/**
- * @param {ServiceWorkerGlobalScope} sw
- * @param {ControllerMessage} message
- */
-async function postMessageToClients (sw, message) {
-  const clients = await getClients(sw);
-
-  clients.forEach((client) => {
-    client.postMessage(message);
-  });
 }
 
 /**
@@ -213,46 +141,6 @@ function main (sw) {
     switch (message.type) {
       case 'sw/skipWaiting': {
         sw.skipWaiting();
-        break;
-      }
-
-      case 'timer/requestStatus': {
-        const running = goalTime !== 0;
-        const remaining = running ? goalTime - Date.now() : 0;
-        postMessageToClients(sw, {
-          preferences,
-          remaining,
-          running,
-          type: 'timer/status',
-        });
-        break;
-      }
-
-      case 'timer/start': {
-        startTimer(
-          message.duration,
-          () => tick(sw),
-          () => {
-            ringAlarm(sw);
-
-            if (preferences.notificationEnabled) {
-              showNotification(sw, "It's time!");
-            }
-          },
-        );
-        postMessageToClients(sw, { type: 'timer/start' });
-        break;
-      }
-
-      case 'timer/stop': {
-        stopTimer();
-        tick(sw);
-        postMessageToClients(sw, { type: 'timer/stop' });
-        break;
-      }
-
-      case 'preferences/notificationEnabled': {
-        preferences.notificationEnabled = message.notificationEnabled;
         break;
       }
 

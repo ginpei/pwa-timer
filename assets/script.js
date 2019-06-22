@@ -1,32 +1,13 @@
 /* eslint-disable no-use-before-define */
 
+import Timer from './Timer.js';
+
 async function installServiceWorker () {
   try {
     await navigator.serviceWorker.register('/pwa-timer/service-worker.js');
   } catch (error) {
     console.error(error);
   }
-}
-
-/**
- * @returns {Promise<ServiceWorker>}
- */
-async function getController () {
-  const reg = await navigator.serviceWorker.ready;
-  const controller = reg.active;
-  if (!controller) {
-    throw new Error('Failed to obtain active controller');
-  }
-
-  return controller;
-}
-
-/**
- * @param {ClientMessage} message
- */
-async function postMessageToController (message) {
-  const controller = await getController();
-  controller.postMessage(message);
 }
 
 async function installNewController () {
@@ -67,19 +48,69 @@ async function subscribePushService () {
 }
 
 /**
- * @param {number} duration
+ * @param {string} body
  */
-function startTimer (duration) {
-  postMessageToController({
-    duration,
-    type: 'timer/start',
-  });
+function showNotification (body) {
+  const title = 'PWA Timer';
+  /** @type {NotificationOptions} */
+  const options = {
+    body,
+    icon: '/pwa-timer/assets/gpui/icon-512.png',
+  };
+  // eslint-disable-next-line no-new
+  new Notification(title, options);
 }
 
-function stopTimer () {
-  postMessageToController({
-    type: 'timer/stop',
-  });
+/**
+ * @param {string} key
+ * @param {any} value
+ */
+function save (key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+/**
+ * @param {string} key
+ */
+function load (key) {
+  const json = localStorage.getItem(key);
+  if (json) {
+    try {
+      const state = JSON.parse(json);
+      return state;
+    } catch (error) {
+      // ignore
+    }
+  }
+  return null;
+}
+
+/**
+ * @param {AppPreferences} preferences
+ */
+function saveAppPreferences (preferences) {
+  save('appPreferences', preferences);
+}
+
+function loadAppPreferences () {
+  /** @type {AppPreferences | null} */
+  const appPreferences = load('appPreferences');
+  return appPreferences || {
+    notificationEnabled: false,
+  };
+}
+
+/**
+ * @param {TimerState} state
+ */
+function saveTimerState (state) {
+  save('timerState', state);
+}
+
+function loadTimerState () {
+  /** @type {TimerState | null} */
+  const state = load('timerState');
+  return state || { ...Timer.initialState };
 }
 
 /**
@@ -91,9 +122,8 @@ function turnNotification (el, enabled) {
   if (permission === 'granted') {
     // eslint-disable-next-line no-param-reassign
     el.checked = enabled;
-    postMessageToController({
+    saveAppPreferences({
       notificationEnabled: enabled,
-      type: 'preferences/notificationEnabled',
     });
   } else if (permission === 'denied') {
     // eslint-disable-next-line no-param-reassign
@@ -195,6 +225,30 @@ async function main () {
     return;
   }
 
+  const appPreferences = loadAppPreferences();
+  const timerState = loadTimerState();
+
+  const timer = new Timer({
+    onAlarm () {
+      renderCount(0);
+      ring(elChime);
+
+      if (appPreferences.notificationEnabled) {
+        showNotification("It's time!");
+      }
+    },
+    onStart (goalTime) {
+      stopRinging(elChime);
+      saveTimerState({ goalTime });
+    },
+    onStop () {
+      stopRinging(elChime);
+    },
+    onTick (remaining) {
+      renderCount(remaining);
+    },
+  });
+
   /** @type {HTMLButtonElement} */
   const elOpenAbout = findElement(document.body, 'openAbout');
   elOpenAbout.onclick = () => {
@@ -204,18 +258,18 @@ async function main () {
   /** @type {HTMLButtonElement} */
   const elTimer5sec = findElement(document.body, 'timer-5sec');
   elTimer5sec.onclick = () => {
-    startTimer(5000);
+    timer.start(5000);
   };
 
   /** @type {HTMLButtonElement} */
   const elTimer3min = findElement(document.body, 'timer-3min');
   elTimer3min.onclick = () => {
-    startTimer(3 * 60 * 1000);
+    timer.start(3 * 60 * 1000);
   };
 
   /** @type {HTMLButtonElement} */
   const elStop = findElement(document.body, 'stop');
-  elStop.onclick = () => stopTimer();
+  elStop.onclick = () => timer.stop();
 
   /** @type {HTMLInputElement} */
   const elNotificationEnabled = findElement(
@@ -246,45 +300,19 @@ async function main () {
         break;
       }
 
-      case 'timer/tick': {
-        renderCount(message.remaining);
-        break;
-      }
-
-      case 'timer/alarm': {
-        renderCount(0);
-        ring(elChime);
-        break;
-      }
-
-      case 'timer/start': {
-        stopRinging(elChime);
-        break;
-      }
-
-      case 'timer/stop': {
-        stopRinging(elChime);
-        break;
-      }
-
-      case 'timer/status': {
-        if (message.running) {
-          renderCount(message.remaining);
-        }
-        elNotificationEnabled.checked = message.preferences.notificationEnabled;
-        findElement(document.body, 'app').hidden = false;
-        break;
-      }
-
       default: // do nothing
     }
   });
 
-  try {
-    postMessageToController({ type: 'timer/requestStatus' });
-  } catch (error) {
-    console.error(error);
+  elNotificationEnabled.checked = appPreferences.notificationEnabled;
+
+  const remaining = timerState.goalTime - Date.now();
+  if (remaining > 0) {
+    timer.start(remaining);
   }
+
+  // elNotificationEnabled.checked = message.preferences.notificationEnabled;
+  findElement(document.body, 'app').hidden = false;
 
   try {
     await subscribePushService();
