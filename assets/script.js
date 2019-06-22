@@ -222,7 +222,7 @@ async function main () {
   const reg = await navigator.serviceWorker.ready;
   if (reg.waiting) {
     await sleep(500); // just in case
-    installNewController();
+    await installNewController();
     return;
   }
 
