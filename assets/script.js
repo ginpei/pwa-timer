@@ -196,7 +196,7 @@ function sleep (ms) {
 }
 
 async function main () {
-  // sometimes accidentaly open '/' while developing
+  // sometimes accidentally open '/' while developing
   if (!window.location.pathname.startsWith('/pwa-timer/')) {
     window.location.replace('/pwa-timer/');
   }
