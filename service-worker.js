@@ -107,6 +107,15 @@ function onFetch (event) {
   }
 }
 
+/**
+ * @param {PushEvent} event
+ * @param {ServiceWorkerGlobalScope} sw
+ */
+function onPush (event, sw) {
+  const p = showNotification(sw, 'Pushed!');
+  event.waitUntil(p);
+}
+
 function getCache () {
   return caches.open('pwa-timer');
 }
@@ -158,12 +167,13 @@ function tick (sw) {
 
 /**
  * @param {ServiceWorkerGlobalScope} sw
+ * @param {string} body
  */
-function showNotification (sw) {
+function showNotification (sw, body) {
   const title = 'PWA Timer';
   /** @type {NotificationOptions} */
   const options = {
-    body: "It's time!",
+    body,
     icon: '/pwa-timer/assets/gpui/icon-512.png',
   };
   sw.registration.showNotification(title, options);
@@ -195,6 +205,7 @@ function main (sw) {
   sw.addEventListener('install', (event) => onInstall(event, sw));
   sw.addEventListener('activate', (event) => onActivate(event, sw));
   sw.addEventListener('fetch', (event) => onFetch(event));
+  sw.addEventListener('push', (event) => onPush(event, sw));
   sw.addEventListener('message', async (event) => {
     /** @type {ClientMessage} */
     const message = event.data;
@@ -225,7 +236,7 @@ function main (sw) {
             ringAlarm(sw);
 
             if (preferences.notificationEnabled) {
-              showNotification(sw);
+              showNotification(sw, "It's time!");
             }
           },
         );

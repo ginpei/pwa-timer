@@ -43,6 +43,30 @@ async function installNewController () {
 }
 
 /**
+ * ```console
+ * $ curl "${ENDPOINT_URL}" --request POST --header "TTL: 60" \
+ * --header "Content-Length: 0" \
+ * --header "Authorization: key=${SERVER_KEY}"
+ * ```
+ * @see https://developers.google.com/web/ilt/pwa/introduction-to-push-notifications#sending_a_push_message_using_firebase_cloud_messaging
+ */
+async function subscribePushService () {
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    // eslint-disable-next-line no-console
+    console.log('End point', sub.endpoint);
+    return;
+  }
+
+  const newSub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+  });
+  // eslint-disable-next-line no-console
+  console.log('End point (new)', newSub.endpoint);
+}
+
+/**
  * @param {number} duration
  */
 function startTimer (duration) {
@@ -260,6 +284,17 @@ async function main () {
     postMessageToController({ type: 'timer/requestStatus' });
   } catch (error) {
     console.error(error);
+  }
+
+  try {
+    await subscribePushService();
+  } catch (error) {
+    // error message is not rendered correctly on Chrome 75
+    if (error instanceof DOMException) {
+      console.error(`${error.code} ${error.message}`, error);
+    } else {
+      console.error(error);
+    }
   }
 }
 

@@ -15,5 +15,6 @@
   "start_url": "/pwa-timer/",
   "display": "standalone",
   "theme_color": "#003366",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "gcm_sender_id": "636485985927"
 }
