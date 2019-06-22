@@ -12,6 +12,7 @@ async function installServiceWorker () {
 
 async function installNewController () {
   const reg = await navigator.serviceWorker.ready;
+  await sleep(1); // sometimes Chrome delay to set reg.waiting
   const newController = reg.waiting;
   if (!newController) {
     throw new Error('No controller is waiting');
