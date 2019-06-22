@@ -217,9 +217,6 @@ async function main () {
     return;
   }
 
-  const appPreferences = loadAppPreferences();
-  const timerState = loadTimerState();
-
   const timer = new Timer({
     onAlarm () {
       renderCount(elCount, 0);
@@ -299,8 +296,10 @@ async function main () {
     }
   });
 
+  const appPreferences = loadAppPreferences();
   elNotificationEnabled.checked = appPreferences.notificationEnabled;
 
+  const timerState = loadTimerState();
   const remaining = timerState.goalTime - Date.now();
   if (remaining > 0) {
     timer.start(remaining);
