@@ -150,14 +150,13 @@ function findElement (container, name) {
   return el;
 }
 
-/** @type {HTMLDivElement} */
-const elCount = findElement(document.body, 'count');
-
 /**
+ * @param {HTMLDivElement} elCount
  * @param {number} remaining
  */
-function renderCount (remaining) {
+function renderCount (elCount, remaining) {
   if (remaining < 0 || !remaining) {
+    // eslint-disable-next-line no-param-reassign
     elCount.textContent = '0:00';
     return;
   }
@@ -167,6 +166,7 @@ function renderCount (remaining) {
   const ss = `0${remainingSeconds % 60}`.slice(-2);
   const count = `${m}:${ss}`;
   if (elCount.textContent !== count) {
+    // eslint-disable-next-line no-param-reassign
     elCount.textContent = count;
   }
 }
@@ -222,7 +222,7 @@ async function main () {
 
   const timer = new Timer({
     onAlarm () {
-      renderCount(0);
+      renderCount(elCount, 0);
       ring(elChime);
 
       if (appPreferences.notificationEnabled) {
@@ -237,7 +237,7 @@ async function main () {
       stopRinging(elChime);
     },
     onTick (remaining) {
-      renderCount(remaining);
+      renderCount(elCount, remaining);
     },
   });
 
@@ -246,6 +246,9 @@ async function main () {
   elOpenAbout.onclick = () => {
     window.location.href = './about.html';
   };
+
+  /** @type {HTMLDivElement} */
+  const elCount = findElement(document.body, 'count');
 
   /** @type {HTMLButtonElement} */
   const elTimer5sec = findElement(document.body, 'timer-5sec');
