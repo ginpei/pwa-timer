@@ -10,20 +10,6 @@ async function installServiceWorker () {
   }
 }
 
-async function installNewController () {
-  const reg = await navigator.serviceWorker.ready;
-  await sleep(1); // sometimes Chrome delay to set reg.waiting
-  const newController = reg.waiting;
-  if (!newController) {
-    throw new Error('No controller is waiting');
-  }
-
-  /** @type {ClientMessage} */
-  const message = { type: 'sw/skipWaiting' };
-  newController.postMessage(message);
-  window.location.reload();
-}
-
 /**
  * ```console
  * $ curl "${ENDPOINT_URL}" --request POST --header "TTL: 60" \
@@ -221,8 +207,13 @@ async function main () {
 
   const reg = await navigator.serviceWorker.ready;
   if (reg.waiting) {
-    await sleep(500); // just in case
-    await installNewController();
+    await sleep(500); // just in case when infinite loop occurs accidentally
+
+    /** @type {ClientMessage} */
+    const message = { type: 'sw/skipWaiting' };
+    reg.waiting.postMessage(message);
+    window.location.reload();
+
     return;
   }
 
@@ -296,7 +287,7 @@ async function main () {
         // eslint-disable-next-line no-alert
         const ok = window.confirm('New version is available. Reload now?');
         if (ok) {
-          await installNewController();
+          window.location.reload();
         }
         break;
       }
