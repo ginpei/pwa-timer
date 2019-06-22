@@ -1,6 +1,6 @@
 {
-  "name": "PWA Timer",
-  "short_name": "PWA Timer",
+  "name": "PWA Timer App",
+  "short_name": "Timer",
   "icons": [
     {
       "src": "/pwa-timer/assets/gpui/icon-192.png",
