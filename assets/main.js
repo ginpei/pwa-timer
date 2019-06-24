@@ -286,6 +286,7 @@ async function main () {
     const message = event.data;
     switch (message.type) {
       case 'sw/install': {
+        await navigator.serviceWorker.getRegistration();
         // ignore if it is the first one which has already taken control
         if (reg.waiting) {
           // eslint-disable-next-line no-alert
