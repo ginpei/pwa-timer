@@ -41,7 +41,10 @@ async function onInstall (event, sw) {
         client.postMessage(message);
       });
     })
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error(error);
+      throw error;
+    });
   event.waitUntil(p);
 }
 
@@ -54,7 +57,10 @@ function onActivate (event, sw) {
   console.log('[SW] activate');
 
   const p = sw.clients.claim()
-    .catch((error) => console.error(error));
+    .catch((error) => {
+      console.error(error);
+      throw error;
+    });
   event.waitUntil(p);
 }
 
