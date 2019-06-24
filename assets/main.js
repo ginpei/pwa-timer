@@ -207,6 +207,8 @@ async function main () {
 
   const reg = await navigator.serviceWorker.ready;
   if (reg.waiting) {
+    // eslint-disable-next-line no-console
+    console.log('Updating to new version...');
     await sleep(500); // just in case when infinite loop occurs accidentally
 
     /** @type {ClientMessage} */
