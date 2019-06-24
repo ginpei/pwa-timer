@@ -2,7 +2,7 @@
 
 const pathBase = '/pwa-timer/';
 
-const cachePaths = [
+const cacheFileNames = [
   'manifest.json',
   'index.html',
   'about.html',
@@ -14,7 +14,7 @@ const cachePaths = [
   'assets/style.css',
   'assets/Timer.js',
 ];
-const outerCachePaths = [
+const outerCacheUrls = [
   'https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap',
   'https://fonts.gstatic.com/s/sharetechmono/v8/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2',
 ];
@@ -44,8 +44,10 @@ function onActivate (event, sw) {
   console.log('[SW] activate');
 
   // TODO avoid 206 somehow
+  const cacheUrls = cacheFileNames.map((v) => `${pathBase}${v}`)
+    .concat(outerCacheUrls);
   const p = getCache()
-    .then((cache) => cache.addAll(cachePaths.map((v) => `${pathBase}${v}`).concat(outerCachePaths)))
+    .then((cache) => cache.addAll(cacheUrls))
     .then(() => sw.clients.claim())
     .catch((error) => console.error(error));
   event.waitUntil(p);
@@ -88,7 +90,7 @@ function onFetch (event) {
     return;
   }
 
-  if (outerCachePaths.includes(sUrl)) {
+  if (outerCacheUrls.includes(sUrl)) {
     event.respondWith(
       getCachedResponse(sUrl)
         .catch((error) => {
