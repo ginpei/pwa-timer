@@ -27,11 +27,12 @@ async function onInstall (event, sw) {
   // eslint-disable-next-line no-console
   console.log('[SW] install');
 
-  const p = getCache()
-    .then(async (cache) => {
+  const p = clearCache()
+    .then(async () => {
       // TODO avoid 206 somehow
       const cacheUrls = cacheFileNames.map((v) => `${pathBase}${v}`)
         .concat(outerCacheUrls);
+      const cache = await getCache();
       await cache.addAll(cacheUrls);
 
       const clients = await sw.clients.matchAll({ includeUncontrolled: true });
@@ -117,6 +118,10 @@ function onFetch (event) {
 function onPush (event, sw) {
   const p = showNotification(sw, 'Pushed!');
   event.waitUntil(p);
+}
+
+function clearCache () {
+  return caches.delete('pwa-timer');
 }
 
 function getCache () {
