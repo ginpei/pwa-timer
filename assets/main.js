@@ -286,10 +286,13 @@ async function main () {
     const message = event.data;
     switch (message.type) {
       case 'sw/install': {
-        // eslint-disable-next-line no-alert
-        const ok = window.confirm('New version is available. Reload now?');
-        if (ok) {
-          window.location.reload();
+        // ignore if it is the first one which has already taken control
+        if (reg.waiting) {
+          // eslint-disable-next-line no-alert
+          const ok = window.confirm('New version is available. Reload now?');
+          if (ok) {
+            window.location.reload();
+          }
         }
         break;
       }
