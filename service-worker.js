@@ -91,24 +91,22 @@ function onFetch (event) {
     const pathname = url.pathname === pathBase
       ? `${pathBase}index.html`
       : url.pathname;
-    event.respondWith(
-      getCachedResponse(pathname)
-        .catch((error) => {
-          console.error(error);
-          return fetch(pathname);
-        }),
-    );
+    const p = getCachedResponse(pathname)
+      .catch((error) => {
+        console.error(error);
+        return fetch(pathname);
+      });
+    event.respondWith(p);
     return;
   }
 
   if (outerCacheUrls.includes(sUrl)) {
-    event.respondWith(
-      getCachedResponse(sUrl)
-        .catch((error) => {
-          console.error(error);
-          return fetch(sUrl);
-        }),
-    );
+    const p = getCachedResponse(sUrl)
+      .catch((error) => {
+        console.error(error);
+        return fetch(sUrl);
+      });
+    event.respondWith(p);
   }
 }
 
