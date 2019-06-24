@@ -27,12 +27,22 @@ async function onInstall (event, sw) {
   // eslint-disable-next-line no-console
   console.log('[SW] install');
 
-  const clients = await sw.clients.matchAll({ includeUncontrolled: true });
-  clients.forEach((client) => {
-    /** @type {ControllerMessage} */
-    const message = { type: 'sw/install' };
-    client.postMessage(message);
-  });
+  const p = getCache()
+    .then(async (cache) => {
+      // TODO avoid 206 somehow
+      const cacheUrls = cacheFileNames.map((v) => `${pathBase}${v}`)
+        .concat(outerCacheUrls);
+      await cache.addAll(cacheUrls);
+
+      const clients = await sw.clients.matchAll({ includeUncontrolled: true });
+      clients.forEach((client) => {
+        /** @type {ControllerMessage} */
+        const message = { type: 'sw/install' };
+        client.postMessage(message);
+      });
+    })
+    .catch((error) => console.error(error));
+  event.waitUntil(p);
 }
 
 /**
@@ -43,12 +53,7 @@ function onActivate (event, sw) {
   // eslint-disable-next-line no-console
   console.log('[SW] activate');
 
-  // TODO avoid 206 somehow
-  const cacheUrls = cacheFileNames.map((v) => `${pathBase}${v}`)
-    .concat(outerCacheUrls);
-  const p = getCache()
-    .then((cache) => cache.addAll(cacheUrls))
-    .then(() => sw.clients.claim())
+  const p = sw.clients.claim()
     .catch((error) => console.error(error));
   event.waitUntil(p);
 }
