@@ -10,7 +10,7 @@ const cachePaths = [
   'assets/gpui/icon-192.png',
   'assets/gpui/icon-512.png',
   'assets/vendor/nhk-creative-library/D0002011518_00000_A_001.m4a',
-  'assets/script.js',
+  'assets/main.js',
   'assets/style.css',
   'assets/Timer.js',
 ];
